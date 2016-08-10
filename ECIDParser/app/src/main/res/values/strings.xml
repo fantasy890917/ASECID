@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">ECIDParser</string>
+    <string name="action_settings">Settings</string>
+</resources>
