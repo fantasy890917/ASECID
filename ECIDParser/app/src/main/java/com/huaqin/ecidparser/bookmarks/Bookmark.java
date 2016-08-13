@@ -5,18 +5,47 @@ package com.huaqin.ecidparser.bookmarks;
  */
 
 public class Bookmark {
-    public String name;
-    public String url;
-    public String read_only;
+    public String mName;
+    public String mUrl;
+    public int mRead_only;
 
-    public Bookmark(String name, String url) {
-        this.name = name;
-        this.url = url;
+    public int getRead_only() {
+        return mRead_only;
     }
 
-    public Bookmark(String name, String url, String read_only) {
-        this.name = name;
-        this.url = url;
-        this.read_only = read_only;
+    public void setRead_only(int read_only) {
+        mRead_only = read_only;
+    }
+
+    public void setUrl(String url) {
+        mUrl = url;
+    }
+
+    public void setName(String name) {
+        mName = name;
+    }
+
+    public String getUrl() {
+        return mUrl;
+    }
+
+    public String getName() {
+        return mName;
+    }
+
+    public Bookmark() {
+        this(null,null);
+    }
+
+    public Bookmark(String name, String url) {
+        mName = name;
+        mUrl = url;
+        mRead_only = -1;
+    }
+
+    public Bookmark(String name, String url, int read_only) {
+        mName = name;
+        mUrl = url;
+        mRead_only = read_only;
     }
 }

@@ -75,4 +75,14 @@ public class LgeMccMncSimInfo {
 	public int getPhoneId() {
 		return mPhoneId;
 	}
+
+	public String toString() {
+		return ("MCC:"
+				+ " " + mMcc
+				+ " MNC" + mMnc
+				+ " GID" + mGid
+				+ " EFSPN" + mSpn
+				+ " IMSI" + mImsi
+				+ " PHONEID" + mPhoneId);
+	}
 }

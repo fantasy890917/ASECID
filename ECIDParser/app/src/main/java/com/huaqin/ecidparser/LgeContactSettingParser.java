@@ -4,8 +4,8 @@ package com.huaqin.ecidparser;
 import android.content.Context;
 import android.util.Log;
 
-import com.huaqin.ecidparser.utils.LgeMccMncSimInfo;
 import com.huaqin.ecidparser.utils.ProfileData;
+import com.huaqin.ecidparser.utils.Utils;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -13,101 +13,50 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
-public class LgeContactSettingParser extends GeneralProfileParser {
 
-    public static final String ATTR_ITEM_STORAGE = "NEW_CONTACT_DEFAULT";
-    public static final String ATTR_VALUE_SIM_STORAGE = "In SIM memory";
-    public static final String ATTR_VALUE_GOOGLE_STORAGE = "In Google memory";
-    public static final String KEY_PREFER_DEFAULT_ACCOUNT = "default_account";
-    public static final String SIM_ACCOUNT = "sim";
-    public static final String GOOGLE_ACCOUNT = "google";
-    public static final String PHONE_ACCOUNT = "phone";
+public class LgeContactSettingParser extends GeneralProfileParser {
+	private static final String TAG = Utils.APP+LgeContactSettingParser.class.getSimpleName();
+
 
    
     public LgeContactSettingParser(Context context) {
 		super(context);
 	}
-   
 
-    @Override
-	protected ProfileData getMatchedProfile(XmlPullParser parser, LgeMccMncSimInfo simInfo, HashMap map) {
-
-                Log.d(TAG, "LgeContactSettingParser-getMatchedProfile");
-		ProfileData commonProfile = null;
-		ProfileData validProfile = null;
-		ProfileData featureProfile = null;
-		boolean found;
-		MatchedProfile profile = new MatchedProfile();
-
-		if (parser == null) {
-			return null;
+	protected ProfileData readProfile(XmlPullParser parser)
+			throws XmlPullParserException, IOException {
+		NameValueProfile p = new NameValueProfile();
+		int type;
+		Log.d(TAG,"readProfile---name="+parser.getName()+" text="+parser.getText());
+		while (ELEMENT_NAME_SIMINFO.equals(parser.getName()) ||
+				ELEMENT_NAME_FEATURESET.equals(parser.getName())) {
+			nextElement(parser);
 		}
 
-		try {
-			// find a "<profiles>" element
-			beginDocument(parser, ELEMENT_NAME_PROFILES);
+		while (ELEMENT_NAME_ITEM.equals(parser.getName())) {
 
-			while (true) {
-				// find a "<profiles>" element
-				if (ELEMENT_NAME_PROFILES.equals(parser.getName())) {
-					nextElement(parser);
+			String tag = parser.getName();
+
+			String key = parser.getAttributeValue(null, ATTR_NAME);
+			Log.d(TAG, "[readProfile] key : " + key);
+			if (key != null) {
+				type = parser.next();
+				Log.d(TAG, "[readProfile] type : " + type);
+				if (type == XmlPullParser.TEXT) {
+					String value = parser.getText();
+					p.setValue(key, value);
+						Log.d(TAG, "[readProfile] KEY : " + key + ", VALUE : " + value);
 				}
-				// find a "<profiles>" element
-				if (ELEMENT_NAME_PROFILE.equals(parser.getName())) {
-					nextElement(parser);    // find a "<siminfo>" element or <FeatureSet>
-				}
-				if (parser.getEventType() == XmlPullParser.END_DOCUMENT) {
-					break;
-				}
-				// find a "<siminfo>" element
-				if (ELEMENT_NAME_SIMINFO.equals(parser.getName())) {
-
-					found = getValidProfile(profile, parser, simInfo);
-
-					// test code , if sim info is null, use default profile (need to place default profile at the top of the profiles, the fastest way)
-					// when bestMatchedProfile was found
-					if (((simInfo == null || simInfo.isNull())
-							&& profile.mDefaultProfile != null)
-							|| profile.mBestMatchedProfile != null) {
-						if (VDBG) {
-							Log.v(TAG, "[getMatchedProfile] sim info : " + simInfo + "bestMatchedProfile" + profile.mBestMatchedProfile);
-						}
-						break;
-					}
-
-					// we didn't parse this element
-					if (!found) {
-						skipCurrentElement(parser);
-
-						if (DBG) { Log.d(TAG, "[getMatchedProfile] skipCurrentElement"); }
-					}
-				} 
-
-				// find a "<CommonProfile>" element 
-				else if (ELEMENT_NAME_COMMONPROFILE.equals(parser.getName())) {
-					commonProfile = readProfile(parser);
-				} 
-				else {
-					throw new XmlPullParserException("Unexpected tag: found " + parser.getName());
-				}
-
 			}
-		} catch (XmlPullParserException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
+			nextElement(parser);
 		}
 
-		validProfile = profile.mBestMatchedProfile != null ? profile.mBestMatchedProfile :
-			profile.mCandidateProfile != null ? profile.mCandidateProfile : profile.mDefaultProfile;
-
-		return mergeProfileIfNeeded(commonProfile, validProfile, featureProfile, map);
-
+		return (ProfileData)p;
 	}
 
     protected void changeGpriValueFromLGE(HashMap hashmap, ProfileData data)
     {
-
+		Log.d(TAG,"changeGpriValueFromLGE");
         HashMap<String, String> matchmap = new HashMap<String,String>();
         matchmap.put("Phonebook@Default_Storage_Location", "NEW_CONTACT_DEFAULT");
         matchmap.put("Phonebook@Display_the_numbers_on_phonebook", "display_number_on_phonebook");

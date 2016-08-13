@@ -28,11 +28,6 @@ public interface GeneralParserAttribute {
     //>2015/11/24-junam.hwang
 
 
-    // [Profile names]
-    public static final String ATTR_NAME = "name";
-    public static final String ATTR_VALUE = "value";
-    public static final String ATTR_URL = "url";
-
 
     public static final String ELEMENT_NAME_PROFILES = "profiles";
     public static final String ELEMENT_NAME_PROFILE = "profile";
@@ -40,8 +35,9 @@ public interface GeneralParserAttribute {
     public static final String ELEMENT_NAME_COMMONPROFILE = "CommonProfile";
     public static final String ELEMENT_NAME_FEATURESET = "FeatureSet";
     public static final String ELEMENT_NAME_ITEM = "item";
-    public static final String ELEMENT_NAME_HOMEPAGE = "homepage";
-    public static final String ELEMENT_NAME_BOOKMARK = "bookmark";
+
+    public static final String ATTR_NAME = "name";
+    public static final String ATTR_VALUE = "value";
 
     //Setting provider
     public static final String ELEMENT_NAME_SYSTEMPROPERTY = "SystemProperty";
@@ -49,19 +45,10 @@ public interface GeneralParserAttribute {
     public static final String ELEMENT_NAME_SETTINGSSECURE = "Settings.Secure";
 
 
-    // [START] Only browser feature
-    public static final String ELEMENT_NAME_SINGLEBINARY = "singlebinary";
-    public static final String ELEMENT_NAME_READONLY = "bookmark_read_only";
-
-    public final static int MATCHCNT = 5;
-    // LGE_WEB [[ alice.ohe 20140410 Auto profile parser bug fix
-    public final static int CANDIDATECNT = 1;
+    public final static int FIND_CANDIDATE_MATCH = 1;
     public final static int NO_MATCH = -1;
-    public final static int FIND_DEFAULT = 0;
-    public final static int FIND_BESTMATCH = 15;
-    public static final String LOG_TAG = "AUTOPROP";
-    // LGE_WEB ]] alice.ohe 20140410 Auto profile parser bug fix
-    // [END] Only browser feature
+    public final static int FIND_DEFAULT_MATCH = 0;
+    public final static int FIND_BEST_MATCH = 2;
 
 
     //Emailconfig flag start

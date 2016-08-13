@@ -19,16 +19,20 @@ import java.io.FileReader;
 import java.util.HashMap;
 import java.util.Iterator;
 public class LgeLTEConfigParser extends GeneralProfileParser implements LteInfoConstants {
-
-    public LgeParserUpdateHandler mLteHandler;
+    private static final String TAG = Utils.APP+LgeLTEConfigParser.class.getName();
+    //<siminfo default="true" /> <siminfo operator="default" country="" mcc="" mnc="" />
+    public HashMap<String, String> mDefaultMatchMap = new HashMap<String,String>();
+    //mccmnc
+    public HashMap<String, String> mCommonMatchMap = new HashMap<String,String>();
+    //mccmnc+gid+spn+imsi
+    public HashMap<String, String> mBestMatchMap = new HashMap<String,String>();
 
 	public LgeLTEConfigParser(Context context) {
 		super(context);
-        mLteHandler = new LgeParserUpdateHandler(mContext);
 	}
 
-	public HashMap<String, String> loadLgProfile(String path, HashMap<String, String> map, LgeMccMncSimInfo siminfo) {
-        Log.d(TAG, "LgeLTEConfigParser loadLgProfile");
+	public HashMap<String, String> loadLgProfile(String path, LgeMccMncSimInfo siminfo) {
+        Log.d(TAG, "loadLgProfile");
         try {
             File file = new File(path);
             in = new FileReader(file);
@@ -47,17 +51,6 @@ public class LgeLTEConfigParser extends GeneralProfileParser implements LteInfoC
         } catch (XmlPullParserException e) {
             e.printStackTrace();
         }
-
-        CAItem cp = getMatchedProfile(parser, siminfo);
-        mPhoneId = siminfo.getPhoneId();
-        if (cp.getValueMap() != null)
-        {
-            changeGpriValueFromLGE(map, cp.getValueMap());
-            mLteHandler.setInfoMap(map);
-            mLteHandler.sendMessage(mLteHandler.obtainMessage(MSG_UPDATE_LTE_MODE_INFO,mPhoneId));
-        }
-
-        return cp.getValueMap();
     }
 
     void changeGpriValueFromLGE(HashMap<String, String> hashmap, HashMap<String, String> data)
