@@ -5,8 +5,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
-import com.huaqin.ecidparser.telephony.LteInfoConstants;
-
 import java.util.HashMap;
 
 import static com.huaqin.ecidparser.GeneralProfileParser.TAG;
@@ -15,7 +13,7 @@ import static com.huaqin.ecidparser.GeneralProfileParser.TAG;
  * Created by shiguibiao on 16-8-10.
  */
 
-public class LgeParserUpdateHandler extends Handler implements LteInfoConstants {
+public class LgeParserUpdateHandler extends Handler {
     public Context mContext;
 
     public HashMap<String, String> mLteParserMap = new HashMap<String,String>();

@@ -21,15 +21,16 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
+
 /**
  * Created by shiguibiao on 16-8-4.
  */
 
-public  class GeneralProfileParser  implements GeneralParserAttribute {
+public class GeneralProfileParser implements GeneralParserAttribute {
 
     public static final String TAG = Utils.APP;
     public static final boolean DBG = false;
-    public static final boolean VDBG = true;
+    public static final boolean VDBG = false;
 
     public Context mContext;
     public FileReader in = null;
@@ -49,19 +50,20 @@ public  class GeneralProfileParser  implements GeneralParserAttribute {
     public static boolean mXmlMatchingData = false;
 
     public static int mPhoneId = 0;
+
     public GeneralProfileParser(Context context) {
         mContext = context;
 
     }
 
 
-
     public class MatchedProfile {
         public ProfileData mBestMatchedProfile;
         public ProfileData mCandidateProfile;
         public ProfileData mDefaultProfile;
-        public MatchedProfile(){
-            mDefaultProfile  = null;
+
+        public MatchedProfile() {
+            mDefaultProfile = null;
             mCandidateProfile = null;
             mBestMatchedProfile = null;
         }
@@ -86,6 +88,7 @@ public  class GeneralProfileParser  implements GeneralParserAttribute {
 
             return mNameValueMap.get(key);
         }
+
         public void remove(String key) {
             mNameValueMap.remove(key);
         }
@@ -117,25 +120,22 @@ public  class GeneralProfileParser  implements GeneralParserAttribute {
     }
 
 
-
-
     /**
      * This method will be called when needs to merge commonProfile and matchedProfile
      *
-     * @param commonProfile which has default attribute
+     * @param commonProfile  which has default attribute
      * @param matchedProfile matched
      * @return The ProfileData merged
      */
 //<2015/12/15-junam.hwang, [D5][PORTING][COMMON][FLEX2][][] modify the gpri mapping
     protected void mergeProfile(ProfileData commonProfile, ProfileData matchedProfile,
-                                       HashMap<String, String> map) {
-        Log.d(TAG,"mergeProfile-----------------");
-        if(matchedProfile == null){
+                                HashMap<String, String> map) {
+        Log.d(TAG, "------------------mergeProfile-----------------");
+        if (matchedProfile == null) {
             return;
         }
-        Log.d(TAG,"matchedProfile-----------------");
-        NameValueProfile cp = (NameValueProfile)commonProfile;
-        NameValueProfile mp = (NameValueProfile)matchedProfile;
+        NameValueProfile cp = (NameValueProfile) commonProfile;
+        NameValueProfile mp = (NameValueProfile) matchedProfile;
 
         Set<String> set;
         Iterator<String> keys;
@@ -152,7 +152,7 @@ public  class GeneralProfileParser  implements GeneralParserAttribute {
                 }
             }
         }
-        Log.d(TAG,"need changeGpriValueFromLGE-----------------");
+        Log.d(TAG, "----------------need changeGpriValueFromLGE-----------------");
         changeGpriValueFromLGE(map, mp);
     }
 
@@ -165,15 +165,17 @@ public  class GeneralProfileParser  implements GeneralParserAttribute {
         String gidValue = parser.getAttributeValue(null, SIMInfoConstants.ATTR_NAME_GID);
         String spnValue = parser.getAttributeValue(null, SIMInfoConstants.ATTR_NAME_SPN);
         String imsiValue = parser.getAttributeValue(null, SIMInfoConstants.ATTR_NAME_IMSI_RANGE);
-        Log.d(TAG, "[test------------] TAG : " + parser.getName()+" MCC : "
-                + mccValue+" MNC :" + mncValue+" GID :" + gidValue
-                +" SPN :" + spnValue+" IMSI:"+imsiValue);
+        if (DBG) {
+            Log.d(TAG, "[test------------] TAG : " + parser.getName() + " MCC : "
+                    + mccValue + " MNC :" + mncValue + " GID :" + gidValue
+                    + " SPN :" + spnValue + " IMSI:" + imsiValue);
+        }
         boolean isDefault = "true".equals(parser.getAttributeValue(null, SIMInfoConstants.ATTR_NAME_DEFAULT));
 
         if (isDefault) {
+            Log.d(TAG, "MATCH DEFAULT");
             return FIND_DEFAULT_MATCH;
         }
-
 
 
         if (matchMccMnc(simInfo, mccValue, mncValue)) {
@@ -224,7 +226,7 @@ public  class GeneralProfileParser  implements GeneralParserAttribute {
     }
 
     //should be override
-    protected  boolean currentElemntShouldBeSkiped(XmlPullParser parser){
+    protected boolean currentElemntShouldBeSkiped(XmlPullParser parser) {
         return ELEMENT_NAME_SIMINFO.equals(parser.getName()) ||
                 ELEMENT_NAME_FEATURESET.equals(parser.getName());
     }
@@ -245,24 +247,32 @@ public  class GeneralProfileParser  implements GeneralParserAttribute {
         if (!Utils.isEmpty(gid) && gidParsed != null) {
             int gidLength = gid.length();
             if ("ff".equals(gid) || "00".equals(gid)) {
-                if (DBG) { Log.d(TAG, "[matchExtension] invalid gid"+gid); }
+                if (DBG) {
+                    Log.d(TAG, "[matchExtension] invalid gid" + gid);
+                }
                 return false;
-            }else if(existInTokens(gidParsed, gid, gidLength)){
-                if (DBG) { Log.d(TAG, "[matchExtension] match gid"); }
+            } else if (existInTokens(gidParsed, gid, gidLength)) {
+                if (DBG) {
+                    Log.d(TAG, "[matchExtension] match gid");
+                }
                 return true;
             }
         }
 
         if (spn != null && spnParsed != null) {
             if (spnParsed.equalsIgnoreCase(spn)) {
-                if (DBG) { Log.d(TAG, "[matchExtension] match spn"); }
+                if (DBG) {
+                    Log.d(TAG, "[matchExtension] match spn");
+                }
                 return true;
             }
         }
 
         if (imsi != null && imsiParsed != null && imsiParsed.length() != 0) {
             if (matchImsi(imsiParsed, imsi)) {
-                if (DBG) { Log.d(TAG, "[matchExtension] match imsi"); }
+                if (DBG) {
+                    Log.d(TAG, "[matchExtension] match imsi");
+                }
                 return true;
             }
         }
@@ -280,13 +290,13 @@ public  class GeneralProfileParser  implements GeneralParserAttribute {
         boolean match_imsi = true;
         int length;
 
-        if (imsi.length() >=  imsiParsed.length()) {
+        if (imsi.length() >= imsiParsed.length()) {
             length = imsiParsed.length();
         } else {
             length = imsi.length();
         }
 
-        for ( int i = 0; i < length; i++ ) {
+        for (int i = 0; i < length; i++) {
             if (imsi.charAt(i) == 'x') {
                 continue;
             } else if (imsi.charAt(i) != imsiParsed.charAt(i)) {
@@ -309,12 +319,13 @@ public  class GeneralProfileParser  implements GeneralParserAttribute {
 
         if (xml_length > len) {
             final_length = len;
-        }
-        else {
+        } else {
             final_length = xml_length;
         }
 
-        if (DBG) { Log.d(TAG, "[existInTokens] final length : " + final_length); }
+        if (DBG) {
+            Log.d(TAG, "[existInTokens] final length : " + final_length);
+        }
 
         String fixed_xml_gid = string.substring(0, final_length);
         String fixed_sim_gid = v.substring(0, final_length);
@@ -334,12 +345,16 @@ public  class GeneralProfileParser  implements GeneralParserAttribute {
             if (!TextUtils.isEmpty(mcc) && !TextUtils.isEmpty(mnc)) {
                 if (mcc.equals(mccParsed) && mnc.equals(mncParsed)) {
                     //if (TextUtils.equals(mcc, mccParsed) && TextUtils.equals(mnc, mncParsed)) {
-                    if (DBG) { Log.d(TAG, "[matchMccMnc] true"); }
+                    if (DBG) {
+                        Log.d(TAG, "[matchMccMnc] true");
+                    }
                     return true;
                 }
             }
         }
-        if (DBG) { Log.d(TAG, "[matchMccMnc] false"); }
+        if (DBG) {
+            Log.d(TAG, "[matchMccMnc] false");
+        }
 
         return false;
     }
@@ -370,16 +385,15 @@ public  class GeneralProfileParser  implements GeneralParserAttribute {
     /**
      * Gets a matched profile from a XmlPullParser
      *
-     * @param parser XmlPullParser object
+     * @param parser  XmlPullParser object
      * @param simInfo The SIM card information
-     * @param map add to preference  eunheon.kim
+     * @param map     add to preference  eunheon.kim
      * @return The ProfileData object matched
      */
     protected void getMatchedProfile(XmlPullParser parser, LgeMccMncSimInfo simInfo, HashMap map) {
 
         Log.d(TAG, "getMatchedProfile");
         ProfileData commonProfile = null;
-        ProfileData validProfile = null;
         int foundPriority = NO_MATCH;
         int currentMatch = NO_MATCH;
         MatchedProfile profile = new MatchedProfile();
@@ -393,28 +407,23 @@ public  class GeneralProfileParser  implements GeneralParserAttribute {
             beginDocument(parser, ELEMENT_NAME_PROFILES);
 
             while (true) {
-                // find a "<profiles>" element
-                Log.d(TAG,"FANTA GET TAG NAME:"+parser.getName());
-                if (ELEMENT_NAME_PROFILES.equals(parser.getName())) {
-                    nextElement(parser);
+                if (DBG) {
+                    Log.d(TAG, "FANTA GET TAG NAME:" + parser.getName());
                 }
-                // find a "<profile>" element
-                if (ELEMENT_NAME_PROFILE.equals(parser.getName())) {
-                    nextElement(parser);    // find a "<siminfo>" element or <FeatureSet>
-                }
+
                 if (parser.getEventType() == XmlPullParser.END_DOCUMENT) {
                     break;
                 }
-                // find a "<siminfo>" element
-                if (ELEMENT_NAME_SIMINFO.equals(parser.getName())) {
+                // find a "<profiles>" element
+                if (ELEMENT_NAME_PROFILES.equals(parser.getName())) {
+                } else if (ELEMENT_NAME_PROFILE.equals(parser.getName())) {// find a "<profile>" element
+                    currentMatch = NO_MATCH;
+                } else if (ELEMENT_NAME_SIMINFO.equals(parser.getName())) {// find a "<siminfo>" element
                     foundPriority = getValidProfile(profile, parser, simInfo);
                     // test code , if sim info is null, use default profile (need to place default profile at the top of the profiles, the fastest way)
                     // when bestMatchedProfile was found
-                    if (profile.mDefaultProfile != null
-                            || profile.mBestMatchedProfile != null) {
-                        if (VDBG) {
-                            Log.v(TAG, "[getMatchedProfile] sim info : " + simInfo + "bestMatchedProfile" + profile.mBestMatchedProfile);
-                        }
+                    if (profile.mBestMatchedProfile != null) {
+                        Log.v(TAG, "[getMatchedProfile] currentMatch : " + currentMatch + "bestMatchedProfile" + profile.mBestMatchedProfile);
                         break;
                     }
 
@@ -423,23 +432,24 @@ public  class GeneralProfileParser  implements GeneralParserAttribute {
                         currentMatch = foundPriority;
                         Log.d(TAG, "[getMatchedProfile] MATCH");
                     }
-                }else if (ELEMENT_NAME_COMMONPROFILE.equals(parser.getName())) {
+                } else if (ELEMENT_NAME_COMMONPROFILE.equals(parser.getName())) {
                     // find a "<CommonProfile>" element
                     commonProfile = readProfile(parser);
-                }else if(parser.getName() !=null){
-                    if(currentMatch != NO_MATCH){
-                        if(currentMatch == FIND_DEFAULT_MATCH){
+                } else if (parser.getName() != null) {
+                    if (currentMatch != NO_MATCH) {
+                        if (currentMatch == FIND_DEFAULT_MATCH) {
                             profile.mDefaultProfile = readProfile(parser);
-                        }else if(currentMatch == FIND_CANDIDATE_MATCH){
-                            if(profile.mCandidateProfile == null){
+                        } else if (currentMatch == FIND_CANDIDATE_MATCH) {
+                            if (profile.mCandidateProfile == null) {
                                 profile.mCandidateProfile = readProfile(parser);
                             }
-                        }else if(currentMatch == FIND_BEST_MATCH){
+                        } else if (currentMatch == FIND_BEST_MATCH) {
                             profile.mBestMatchedProfile = readProfile(parser);
                         }
+                        continue;
                     }
 
-                }else {
+                } else {
                     throw new XmlPullParserException("Unexpected tag: found " + parser.getName());
                 }
                 nextElement(parser);
@@ -450,27 +460,59 @@ public  class GeneralProfileParser  implements GeneralParserAttribute {
             e.printStackTrace();
         }
 
+        mergeProfileIfNeed(profile, commonProfile, map);
+
+
+    }
+
+    protected void mergeProfileIfNeed(MatchedProfile profile, ProfileData commonProfile,
+                                      HashMap<String, String> map) {
+        Log.d(TAG, "------------------mergeProfileIfNeed-----------------");
+        ProfileData validProfile = null;
         validProfile = profile.mBestMatchedProfile != null ? profile.mBestMatchedProfile :
                 profile.mCandidateProfile != null ? profile.mCandidateProfile : profile.mDefaultProfile;
-        if(validProfile!=null){
+        if (profile.mDefaultProfile != null
+                && (profile.mCandidateProfile != null || profile.mBestMatchedProfile != null)) {
+            //for CLR COM telephony.xml if has default attr no_sim_card ,but candidate and best
+            //has no it , so default need merge with candidate or best.
+            Log.d(TAG, "merge default with condidate or best");
+            NameValueProfile defualt = (NameValueProfile) profile.mDefaultProfile;
+            NameValueProfile valid = (NameValueProfile) validProfile;
+
+            Set<String> set;
+            Iterator<String> keys;
+            set = defualt.mNameValueMap.keySet();
+            keys = set.iterator();
+
+            while (keys.hasNext()) {
+                String key = keys.next();
+                if (!valid.mNameValueMap.containsKey(key)) {
+                    Log.d(TAG, "merge default key----------" + key);
+                    valid.mNameValueMap.put(key, defualt.getValue(key));
+                }
+            }
+        }
+
+        if (validProfile != null)
+
+        {
             mergeProfile(commonProfile, validProfile, map);
-        }else{
-            Log.d(TAG,"[getMatchedProfile] is null]");
         }
 
 
     }
-    /* */
-    protected void changeGpriValueFromLGE(HashMap map,  ProfileData validProfile) {}
 
-    public void loadLgProfile(String path, HashMap<String, String> map, LgeMccMncSimInfo siminfo)
-    {
+    /* */
+    protected void changeGpriValueFromLGE(HashMap map, ProfileData validProfile) {
+    }
+
+    public void loadLgProfile(String path, HashMap<String, String> map, LgeMccMncSimInfo siminfo) {
         try {
             File file = new File(path);
             in = new FileReader(file);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
-            return ;
+            return;
         }
         try {
             factory = XmlPullParserFactory.newInstance();

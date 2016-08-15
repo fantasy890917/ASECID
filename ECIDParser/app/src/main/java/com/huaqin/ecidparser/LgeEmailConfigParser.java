@@ -4,80 +4,95 @@ import android.content.Context;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.huaqin.ecidparser.bookmarks.Bookmark;
 import com.huaqin.ecidparser.email.EEMAIL_AUTHENTICATION_TYPE;
 import com.huaqin.ecidparser.email.EEMAIL_PROTOCOL_TYPE;
-import com.huaqin.ecidparser.email.EmailInfoConstants;
-import com.huaqin.ecidparser.email.OperatorConfigData;
+import com.huaqin.ecidparser.email.EmailParserAttribute;
 import com.huaqin.ecidparser.email.OperatorConfigData.EmailServiceProvider;
 import com.huaqin.ecidparser.email.OperatorConfigData.PreAccount;
 import com.huaqin.ecidparser.email.OperatorConfigData.Setting;
 import com.huaqin.ecidparser.email.OperatorConfigData.WelcomeMessage;
-import com.huaqin.ecidparser.utils.LgeMccMncSimInfo;
+import com.huaqin.ecidparser.utils.ProfileData;
 import com.huaqin.ecidparser.utils.Utils;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlPullParserFactory;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.Reader;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.regex.Pattern;
 
-public class LgeEmailConfigParser extends GeneralProfileParser implements EmailInfoConstants {
+public class LgeEmailConfigParser extends GeneralProfileParser implements EmailParserAttribute {
 
-	private final static String TAG = Utils.APP;
-
-	private DecorateParser decorateParser;
-	protected OperatorConfigData mData;
+	private final static String TAG = Utils.APP+LgeEmailConfigParser.class.getSimpleName();;
 	private Context mContext;
-	 
+
 
 	public LgeEmailConfigParser(Context context) {
 		super(context);
-		mData = new OperatorConfigData();
 		mContext = context;
 	}
 
-	public OperatorConfigData getData(){
-		return mData;
-	}
-	
-    public HashMap<String, String> loadLgProfile(String path, HashMap<String, String> map, LgeMccMncSimInfo siminfo) {
-		
-        int scoreOperatorXML = 0;
-        InputStream in = xmlFileOpenExternal(path);
-        if (in != null)
-        {
-            try {
-                factory = XmlPullParserFactory.newInstance();
-                factory.setValidating(false);
-                decorateParser = new DecorateParser(factory.newPullParser());
-                decorateParser.setInput(in, null);
-                Log.d(TAG, "[parse] COTA file exists.");
-                emailConfigProfile(decorateParser, scoreOperatorXML, siminfo);
-                
-                changeGpriValueFromLGE(map);
-               
-            } catch (XmlPullParserException e) {
-                Log.e(TAG, "XmlPullParserException : Check cota xml parsing, cotaProfile"+e.toString());
-                }
-        } 
+    /**
+     * This method will be called whenever the parser meets &lt;Profile&gt;
+     *
+     * @param parser XmlPullParser
+     * @return The ProfileData object
+     */
+    protected ProfileData readProfile(XmlPullParser parser) throws XmlPullParserException, IOException {
 
-        return null;
+        NameValueProfile p = new NameValueProfile();
+        Log.d(TAG,"[readProfile]name="+parser.getName()+" text="+parser.getText());
+
+        while (ELEMENT_NAME_SIMINFO.equals(parser.getName()) ||
+                ELEMENT_NAME_FEATURESET.equals(parser.getName())) {
+            nextElement(parser);
+        }
+        while (parser.getName() != null
+                &&(!parser.getName().equals(ELEMENT_NAME_PROFILE))) {
+
+            String tag = parser.getName();
+            Log.d(TAG, "[readProfile]tag=" + tag);
+            switch (tag) {
+                case ELEMENT_NAME_READONLY: {
+                    String value = parser.getAttributeValue(null, ATTR_VALUE);
+                    p.setValue(tag, value);
+                    Log.d(TAG, "[readProfile][READ_ONLY]=" + value);
+                    break;
+                }
+                case ELEMENT_NAME_BOOKMARK: {
+                    String editable = parser.getAttributeValue(null, ATTR_READONLY);
+                    String title = parser.getAttributeValue(null, ATTR_NAME);
+                    String url = parser.getAttributeValue(null, ATTR_URL);
+                    if (editable != null) {
+                        mBookmarkList.add(new Bookmark(title,url, Integer.parseInt(editable)));
+                    } else {
+                        mBookmarkList.add(new Bookmark(title,url, -1));
+                    }
+                    Log.d(TAG, "[readProfile][BOOKMARK TITLE]=" + title + " [URL]=" + url);
+                    break;
+                }
+                case ELEMENT_NAME_HOMEPAGE: {
+                    String value = parser.getAttributeValue(null, ATTR_VALUE);
+                    p.setValue(tag, value);
+                    Log.d(TAG, "[readProfile][HOMEPAGE]=" + value);
+                    break;
+                }
+                default:
+                    // do nothing
+                    break;
+
+            }
+            nextElement(parser);
+        }
+
+        return (ProfileData)p;
     }
 
     protected void changeGpriValueFromLGE(HashMap<String, String> hashmap)
     {
-        Log.d(TAG,"LgeEmailConfigParser-changeGpriValueFromLGE");
-        Log.d(TAG,"mData ==="+mData.toString());
+        Log.d(TAG,"changeGpriValueFromLGE");
         /*
             <notification enabled="true" />
             <signature enabled="false" />
@@ -86,7 +101,7 @@ public class LgeEmailConfigParser extends GeneralProfileParser implements EmailI
             <contact sync="true" />
             <calendar sync="true" />
         */
-        // not configured: updateScheduleInPeak="0" updateScheduleOffPeak="0" 
+        // not configured: updateScheduleInPeak="0" updateScheduleOffPeak="0"
         Setting setting = mData.getSetting();
         /*
         hashmap.put(flex.ID_ONESW_EMAIL_USE_CALENDAR_SYNC, setting.isCalendarSync()?"Yes":"No");
@@ -106,7 +121,7 @@ public class LgeEmailConfigParser extends GeneralProfileParser implements EmailI
                 <incoming address="pop.aliceadsl.fr" protocol="pop3" port="110" security="0" username="" password="" />
                 <outgoing address="smtp.aliceadsl.fr" auth="false" port="25" security="0" username="" password="" />
             </provider>
-           */     
+           */
         // not used: fulladdress_id
         ArrayList<EmailServiceProvider> emailServiceProviders = mData.getEmailServiceProvider();
         String preTag = "Email@Preset_Accounts_" ;
@@ -114,181 +129,80 @@ public class LgeEmailConfigParser extends GeneralProfileParser implements EmailI
         {
             EmailServiceProvider esp = emailServiceProviders.get(i-1);
 
-            String type_tag = preTag + i + "_Type"; 
-            hashmap.put(type_tag, "provider") ; 
+            String type_tag = preTag + i + "_Type";
+            hashmap.put(type_tag, "provider") ;
             Log.d(TAG,"LgeEmailConfigParser:changeGpriValueFromLGE, type_tag = " + type_tag + " value = " + "provider");
-            
+
             String domain_flag = preTag + i + "_Domain";
-            hashmap.put(domain_flag, esp.getDomain()) ; 
+            hashmap.put(domain_flag, esp.getDomain()) ;
             Log.d(TAG,"LgeEmailConfigParser:changeGpriValueFromLGE, domain_flag = " + domain_flag + " value = " + esp.getDomain());
-            
+
             String title_flag = preTag + i + "_Account_Title";
-            hashmap.put(title_flag, esp.getDescription()) ; 
+            hashmap.put(title_flag, esp.getDescription()) ;
             Log.d(TAG,"LgeEmailConfigParser:changeGpriValueFromLGE, domain_flag = " + domain_flag + " value = " + esp.getDescription());
 
             String email_flag = preTag + i + "_Email_Adress";
-            hashmap.put(email_flag, esp.getEmailAddress()) ; 
+            hashmap.put(email_flag, esp.getEmailAddress()) ;
             Log.d(TAG,"LgeEmailConfigParser:changeGpriValueFromLGE, email_flag = " + email_flag + " value = " + esp.getEmailAddress());
 
             String incoming_protocol_flag = preTag + i + "_Incoming_Server_Protocol" ;
-            hashmap.put(incoming_protocol_flag, esp.getSupportedProtocalType()) ; 
+            hashmap.put(incoming_protocol_flag, esp.getSupportedProtocalType()) ;
             Log.d(TAG,"LgeEmailConfigParser:changeGpriValueFromLGE, incoming_protocol_flag = " + incoming_protocol_flag + " value = " + esp.getSupportedProtocalType());
 
             String incoming_address_flag = preTag + i + "_Incoming_Server_Address" ;
-            hashmap.put(incoming_address_flag, esp.getIncomingServerAddress()) ; 
+            hashmap.put(incoming_address_flag, esp.getIncomingServerAddress()) ;
             Log.d(TAG,"LgeEmailConfigParser:changeGpriValueFromLG, incoming_address_flag = " + incoming_address_flag + " value = " + esp.getIncomingServerAddress());
 
             String incoming_security_flag = preTag + i + "_Incoming_Server_Security" ;
-//            hashmap.put(incoming_security_flag, String.valueOf(esp.getNeedSecureConnectionForIncoming().swigValue())) ; 
-            hashmap.put(incoming_security_flag, esp.convertSecurityForm(esp.getSecurityForIncoming())) ; 
+//            hashmap.put(incoming_security_flag, String.valueOf(esp.getNeedSecureConnectionForIncoming().swigValue())) ;
+            hashmap.put(incoming_security_flag, esp.convertSecurityForm(esp.getSecurityForIncoming())) ;
             Log.d(TAG,"LgeEmailConfigParser:changeGpriValueFromLGE, incoming_security_flag = " + incoming_security_flag + " value = " + esp.convertSecurityForm(esp.getSecurityForIncoming()));
 
             String incoming_port_flag = preTag + i + "_Incoming_Server_Port" ;
-            hashmap.put(incoming_port_flag, String.valueOf(esp.getIncomingServerPortNumber())) ; 
+            hashmap.put(incoming_port_flag, String.valueOf(esp.getIncomingServerPortNumber())) ;
             Log.d(TAG,"LgeEmailConfigParser:changeGpriValueFromLGE, incoming_port_flag = " + incoming_port_flag + " value = " + String.valueOf(esp.getIncomingServerPortNumber()));
 
             String incoming_user_flag = preTag + i + "_Incoming_User_Name" ;
-            hashmap.put(incoming_user_flag, esp.getIncomingUsername()) ; 
+            hashmap.put(incoming_user_flag, esp.getIncomingUsername()) ;
             Log.d(TAG,"LgeEmailConfigParser:changeGpriValueFromLGE, incoming_user_flag = " + incoming_user_flag + " value = " + esp.getIncomingUsername());
 
             String incoming_password_flag = preTag + i + "_Incoming_Password" ;
-            hashmap.put(incoming_password_flag, esp.getIncomingPassword()) ; 
+            hashmap.put(incoming_password_flag, esp.getIncomingPassword()) ;
             Log.d(TAG,"LgeEmailConfigParser:changeGpriValueFromLGE, incoming_password_flag = " + incoming_password_flag + " value = " + esp.getIncomingPassword());
 
             // the value in xml is true or false, but in EmailServiceProvider, it is a int value. So save it as int value.
             String outgoing_auth_flag = preTag + i + "_Outgoing_Server_Authentication" ;
-            hashmap.put(outgoing_auth_flag, String.valueOf(esp.convertOnOffForm(esp.getAuthenticationType()))) ; 
+            hashmap.put(outgoing_auth_flag, String.valueOf(esp.convertOnOffForm(esp.getAuthenticationType()))) ;
             Log.d(TAG,"LgeEmailConfigParser:changeGpriValueFromLGE, outgoing_auth_flag = " + outgoing_auth_flag + " value = " + String.valueOf(esp.getAuthenticationType()));
-            
+
             String outgoing_address_flag = preTag + i + "_Outgoing_Server_Address" ;
-            hashmap.put(outgoing_address_flag, esp.getOutgoingServerAddress()) ; 
+            hashmap.put(outgoing_address_flag, esp.getOutgoingServerAddress()) ;
             Log.d(TAG,"LgeEmailConfigParser:changeGpriValueFromLGE, outgoing_address_flag = " + outgoing_address_flag + " value = " + esp.getOutgoingServerAddress());
 
             String outgoing_security_flag = preTag + i + "_Outgoing_Server_Security" ;
-            hashmap.put(outgoing_security_flag, esp.convertSecurityForm(esp.getSecurityForOutgoing())) ; 
+            hashmap.put(outgoing_security_flag, esp.convertSecurityForm(esp.getSecurityForOutgoing())) ;
             Log.d(TAG,"LgeEmailConfigParser:changeGpriValueFromLGE, outgoing_security_flag = " + outgoing_security_flag + " value = " + esp.convertSecurityForm(esp.getSecurityForOutgoing()));
 
             String outgoing_port_flag = preTag + i + "_Outgoing_Server_Port" ;
-            hashmap.put(outgoing_port_flag, String.valueOf(esp.getOutgoingServerPortNumber())) ; 
+            hashmap.put(outgoing_port_flag, String.valueOf(esp.getOutgoingServerPortNumber())) ;
             Log.d(TAG,"LgeEmailConfigParser:changeGpriValueFromLGE, outgoing_port_flag = " + outgoing_port_flag + " value = " + String.valueOf(esp.getOutgoingServerPortNumber()));
 
             String outgoing_user_flag = preTag + i + "_Outgoing_User_Name" ;
-            hashmap.put(outgoing_user_flag, esp.getOutgoingUsername()) ; 
+            hashmap.put(outgoing_user_flag, esp.getOutgoingUsername()) ;
             Log.d(TAG,"LgeEmailConfigParser:changeGpriValueFromLGE, outgoing_user_flag = " + outgoing_user_flag + " value = " + esp.getOutgoingUsername());
 
             String outgoing_password_flag = preTag + i + "_Outgoing_Password" ;
-            hashmap.put(outgoing_password_flag, esp.getOutgoingPassword()) ; 
+            hashmap.put(outgoing_password_flag, esp.getOutgoingPassword()) ;
             Log.d(TAG,"LgeEmailConfigParser:changeGpriValueFromLGE, outgoing_password_flag = " + outgoing_password_flag + " value = " + esp.getOutgoingPassword());
         }
-        
+
         // not configured
         //PreAccount preAccount = mData.getPreAccount();
         //WelcomeMessage welcomMessage = mData.getWelcomeMessage();
     }
-
-	 protected static InputStream xmlFileOpenExternal(String path) {
-		         InputStream in = null;
-		         final String filePath = path;
-		         if (filePath != null) {
-		             File file = new File(filePath);
-		 
-		             if (file != null && file.exists()) {
-		                 Log.d("[COTA_EU] exist ", "");
-		                 try {
-		                     in = new BufferedInputStream(new FileInputStream(file));
-		                 } catch (FileNotFoundException e) {
-		                     e.printStackTrace();
-		                 }
-		             } else {
-		                 Log.d("[COTA_EU] not exist!! ","");
-		             }
-		         }
-		 
-		         if (in == null) {
-		             Log.d(TAG,"[COTA_EU] InputStream in is null!! ");
-		         }
-		 
-		         return in;
-		 
-		     }
-	 
-	protected int emailConfigProfile(DecorateParser parser, int scoreMatchedXML, LgeMccMncSimInfo siminfo) {
-        Log.d(TAG, "emailConfigProfile");
-		int priority = scoreMatchedXML;
-		int currentPriority = 0;
-		try {
-			int parseEvent = parser.getEventType();
-			while (parseEvent != DecorateParser.END_DOCUMENT) {
-				switch (parseEvent) {
-				case DecorateParser.START_TAG:
-					String tag = parser.getName();
-					if (tag != null && tag.equals(ELEMENT_NAME_SIMINFO)) {
-						currentPriority = scoreMatchSimInfo(parser, siminfo);
-						if (priority < currentPriority) {
-							startParse(parser);
-							priority = currentPriority;
-							break;
-						}
-					}
-					break;
-				default:
-					break;
-				}
-				parseEvent = parser.next();
-			}
-		} catch (XmlPullParserException e) {
-			          Log.e(TAG, "XmlPullParserException : Check config xml parsing, autoProfile");
-			          Log.e(TAG, e.getMessage());
-		} catch (IOException e) {
-			          Log.e(TAG, "IOException : Check config xml parsing, autoProfile");
-			          Log.e(TAG, e.getMessage());
-		}
-		return priority;
-	}
-
-
-
-	 /**
-     * Start parse matched profile.
-     * 
-     * @param parser
-     * @return OperatorConfigData
-     */
-    protected void startParse(DecorateParser parser) {
-        Log.d(TAG, "startParse()");
-        try {
-            int parseEvent = parser.getEventType();
-            // parse until meet the end of 'profile' tag
-            while (!(parseEvent == XmlPullParser.END_TAG && parser.getName() !=null && parser.getName()
-                    .equals("profile"))) {
-                Log.d(TAG, "sparseEvent=="+parseEvent+" getName="+parser.getName());
-                switch (parseEvent) {
-                case DecorateParser.START_TAG:
-                    parseSettingstag(parser);
-                    parseAccounttag(parser);
-                    // parseMessagetag(parser); //unused
-                    parseProvidertag(parser);
-                    break;
-                default:
-                    break;
-                }
-                parseEvent = parser.next();
-            }
-        } catch (XmlPullParserException e) {
-            Log.e(TAG ,"XmlPullParserException : Check config xml parsing, startParse");
-            Log.e(TAG, e.getMessage());
-        } catch (IOException e) {
-            Log.e(TAG, "IOException : Check config xml parsing, startParse");
-            Log.e(TAG, e.getMessage());
-        } catch (Exception e) {
-        	Log.e(TAG, "Exception");
-        }
-        
-    }
-    
     /**
      * Parse Provider Tag information
-     * 
+     *
      * @param parser
      */
     private void parseProvidertag(DecorateParser parser) {
@@ -310,13 +224,13 @@ public class LgeEmailConfigParser extends GeneralProfileParser implements EmailI
             }
         }
     }
-    
-      
+
+
     private static String getXmlAttribute(Context context, DecorateParser xml,
             String name) {
         return xml.getAttributeValue(null, name);
     }
-    
+
     private static boolean isXmlAttributeNullOrEmpty(String value) {
         if (value == null || "".equals(value) == true) {
             return true;
@@ -324,11 +238,11 @@ public class LgeEmailConfigParser extends GeneralProfileParser implements EmailI
         return false;
     }
 
-  
-    
+
+
     /**
      * Parse Account Tag information
-     * 
+     *
      * @param parser
      */
     private void parseAccounttag(DecorateParser parser) {
@@ -348,16 +262,16 @@ public class LgeEmailConfigParser extends GeneralProfileParser implements EmailI
             }
         }
     }
-    
+
     /**
      * Parse Settings Tag information
-     * 
+     *
      * @param parser
      */
     private void parseSettingstag(DecorateParser parser) {
         Log.d(TAG, "parseSettingstag()");
         String tag = parser.getName();
-		
+
         if (tag != null && tag.equals("settings")) {
             try {
                 parseSetting(parser);
@@ -372,10 +286,10 @@ public class LgeEmailConfigParser extends GeneralProfileParser implements EmailI
             }
         }
     }
-    
+
     /**
      * Parse setting information
-     * 
+     *
      * @param parser
      * @throws XmlPullParserException
      * @throws IOException
@@ -422,96 +336,9 @@ public class LgeEmailConfigParser extends GeneralProfileParser implements EmailI
         }
     }
 
-
-	protected int scoreMatchSimInfo(DecorateParser parser, LgeMccMncSimInfo siminfo)
-			throws XmlPullParserException, IOException {
-
-		String deviceMcc = siminfo.getMcc();
-		String deviceMnc = siminfo.getMnc();
-		String deviceGid = siminfo.getGid();
-		if (deviceGid != null) {
-			deviceGid = deviceGid.toUpperCase();
-		}
-		String deviceSpn = siminfo.getSpn();
-		String deviceImsi = siminfo.getImsi();
-
-		int parseEvent = parser.getEventType();
-		int gidPriority = 0;
-		int spnPriority = 0;
-		int imsiPriority = 0;
-		int currentPriority = 0;
-
-		String parserMcc = parser.getAttributeValue(null, "mcc");
-		String parserMnc = parser.getAttributeValue(null, "mnc");
-		String parserGid = parser.getAttributeValue(null, "gid");
-		if (parserGid != null) {
-			parserGid = parserGid.toUpperCase();
-		}
-		String parserSpn = parser.getAttributeValue(null, "spn");
-		String parserImsi = parser.getAttributeValue(null, "imsi");
-        Log.d(Utils.APP, "parserMcc = "+parserMcc+" parserMnc= "+parserMnc+" parserGid= "+parserGid+" parserSpn= "+parserSpn+" parserImsi= "+parserImsi);
-
-        switch (parseEvent) {
-		case DecorateParser.START_TAG:
-
-			if (checkMatch(deviceMcc, parserMcc, FLAGS_MATCH_MCC) == FLAGS_MATCH_MCC
-			&& checkMatch(deviceMnc, parserMnc, FLAGS_MATCH_MNC) == FLAGS_MATCH_MNC) {
-
-				spnPriority = checkMatch(deviceSpn, parserSpn, FLAGS_MATCH_SPN);
-				gidPriority = checkMatch(deviceGid, parserGid, FLAGS_MATCH_GID);
-				imsiPriority = checkMatch(deviceImsi, parserImsi,
-						FLAGS_MATCH_IMSI);
-
-				if (gidPriority == FLAGS_NO_MATCH
-						|| spnPriority == FLAGS_NO_MATCH
-						|| imsiPriority == FLAGS_NO_MATCH) {
-					return currentPriority; // 0
-				} else {
-					currentPriority = gidPriority + spnPriority + imsiPriority;
-					return currentPriority;
-				}
-			}
-			break;
-		default:
-			break;
-		}
-		return currentPriority; // 0
-	}
-
-
-	protected int checkMatch(String deviceInfo, String parserInfo, int checkMatchApi) {
-
-		if (TextUtils.isEmpty(parserInfo)) { // PRI 정보없음 무시
-			return FLAGS_MATCH_FOR_NO_PRI;
-		} else if (TextUtils.isEmpty(deviceInfo)) { // PRI 정보는 있는데, device정보 없음
-			// mismatch
-			return FLAGS_NO_MATCH;
-		}
-
-		// PRI 정보와 SIM 정보 일치!! or //PRI 정보와 SIM 정보 불일치
-		if (checkMatchApi == FLAGS_MATCH_IMSI) {
-			if (Pattern.compile(parserInfo.replace("x", "."))
-					.matcher(deviceInfo).find()) {
-				return checkMatchApi;
-			} else {
-				return FLAGS_NO_MATCH;
-			}
-		} else if (checkMatchApi == FLAGS_MATCH_GID) {
-			if (deviceInfo.startsWith(parserInfo)) {
-				return checkMatchApi;
-			} else {
-				return FLAGS_NO_MATCH;
-			}
-		} else if (deviceInfo.equals(parserInfo)) {
-			return checkMatchApi;
-		} else {
-			return FLAGS_NO_MATCH;
-		}
-	}
-
 	 /**
      * Parse ESP Tag information
-     * 
+     *
      * @param parser
      * @param setting
      */
@@ -523,7 +350,7 @@ public class LgeEmailConfigParser extends GeneralProfileParser implements EmailI
 
     /**
      * Parse Protocol Tag information
-     * 
+     *
      * @param parser
      * @param setting
      */
@@ -542,7 +369,7 @@ public class LgeEmailConfigParser extends GeneralProfileParser implements EmailI
         setting.popDeletePolicy = parser.getAttributeIntValue(
                 null,
                 "popDeletePolicy", -1);
-                
+
         setting.smtpAuth = parser.getAttributeBooleanValue(null, "smtpAuth",
                 true);
         setting.changeProtocolEnable = parser.getAttributeBooleanValue(null,
@@ -556,22 +383,22 @@ public class LgeEmailConfigParser extends GeneralProfileParser implements EmailI
                 .getAttributeIntValue(
                         null,
                         "emailDaystoSync", -1);
-                       
+
         setting.maxEmailtoShow = parser
                 .getAttributeIntValue(
                         null,
                         "maxEmailtoShow", -1);
-                        
+
         setting.updateScheduleInPeak = parser
                 .getAttributeIntValue(
                         null,
                         "updateScheduleInPeak", -1);
-                        
+
         setting.updateScheduleOffPeak = parser
                 .getAttributeIntValue(
                         null,
                         "updateScheduleOffPeak", -1);
-                        
+
         /* rabbani.shaik@lge.com ,11, July 2012,AccountSettings -- [End] */
         setting.messageSizeLimit = parser.getAttributeIntValue(null, "messageSizeLimit", -1);
 
@@ -579,7 +406,7 @@ public class LgeEmailConfigParser extends GeneralProfileParser implements EmailI
 
     /**
      * Parse Notification Tag information
-     * 
+     *
      * @param parser
      * @param setting
      */
@@ -591,12 +418,12 @@ public class LgeEmailConfigParser extends GeneralProfileParser implements EmailI
                 .getAttributeIntValue(
                         null,
                         "vibrate", -1);
-                        
+
     }
 
     /**
      * Parse Signature Tag
-     * 
+     *
      * @param parser
      * @param setting
      * @throws XmlPullParserException
@@ -631,7 +458,7 @@ public class LgeEmailConfigParser extends GeneralProfileParser implements EmailI
 
     /**
      * Parse setting information
-     * 
+     *
      * @param parser
      * @param setting
      */
@@ -640,17 +467,17 @@ public class LgeEmailConfigParser extends GeneralProfileParser implements EmailI
         setting.calendarSync = parser.getAttributeBooleanValue(
                 null,
                 "sync", false);
-                
+
         setting.calendarSyncAmount = parser
                 .getAttributeIntValue(
                         null,
                         "amount",-1);
-                        
+
     }
 
     /**
      * Parse setting information
-     * 
+     *
      * @param parser
      * @param setting
      */
@@ -658,13 +485,13 @@ public class LgeEmailConfigParser extends GeneralProfileParser implements EmailI
         setting.contactSync = parser.getAttributeBooleanValue(
                 null,
                 "sync", false);
-                
+
     }
 
     /* rabbani.shaik@lge.com ,11, July 2012,AccountSettings -- [Start] */
     /**
      * Parse setting information
-     * 
+     *
      * @param parser
      * @param setting
      */
@@ -672,17 +499,17 @@ public class LgeEmailConfigParser extends GeneralProfileParser implements EmailI
         setting.tasksSync = parser.getAttributeBooleanValue(
                 null,
                 "sync", false);
-               
+
     }
 
     /* rabbani.shaik@lge.com ,11, July 2012,AccountSettings -- [End] *//**
-     * 
+     *
      * /*rabbani.shaik@lge.com ,11, July 2012,AccountSettings -- [End]
      */
     // LGE_CHANGE_SMS_SYNC_BEGIN sunghwa.woo 20140409 to support apk overlay
     /**
      * Parse setting information
-     * 
+     *
      * @param parser
      * @param setting
      */
@@ -690,13 +517,13 @@ public class LgeEmailConfigParser extends GeneralProfileParser implements EmailI
         setting.smsSync = parser.getAttributeBooleanValue(
                 null,
                 "sync",false);
-                
+
     }
 
     // LGE_CHANGE_SMS_SYNC_END sunghwa.woo 20140409 to support apk overlay
     /**
      * Parse PreAccount
-     * 
+     *
      * @param parser
      * @throws XmlPullParserException
      * @throws IOException
@@ -754,7 +581,7 @@ public class LgeEmailConfigParser extends GeneralProfileParser implements EmailI
 
     /**
      * Parse Welcome Message
-     * 
+     *
      * @param parser
      * @throws XmlPullParserException
      * @throws IOException
@@ -791,7 +618,7 @@ public class LgeEmailConfigParser extends GeneralProfileParser implements EmailI
 
     /**
      * Parse Eamil Service Providers list
-     * 
+     *
      * @param xml
      * @throws XmlPullParserException
      * @throws IOException
@@ -984,238 +811,5 @@ public class LgeEmailConfigParser extends GeneralProfileParser implements EmailI
             xmlEventType = xml.next();
         }
     }
-    
-    protected  class DecorateParser implements XmlPullParser {
 
-        private InputStream mInputStream;
-        private XmlPullParser xmlParser;
-
-        public DecorateParser(XmlPullParser xmlParser) {
-            this.xmlParser = xmlParser;
-        }
-
-        public void closeInputStream() {
-            if (mInputStream != null) {
-                try {
-                    mInputStream.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
-        public boolean getAttributeBooleanValue(String namespace,
-                String attribute, boolean defaultValue) {
-            String attributeString = xmlParser.getAttributeValue(namespace,
-                    attribute);
-            Log.d(TAG,"attribute="+attribute+" value="+attributeString);
-            if (attributeString == null) {
-                return defaultValue;
-            }
-            return Boolean.parseBoolean(attributeString);
-        }
-
-        public int getAttributeIntValue(String namespace, String attribute,
-                int defaultValue) {
-            String attributeString = xmlParser.getAttributeValue(namespace,
-                    attribute);
-            Log.d(TAG,"attribute="+attribute+" value="+attributeString);
-            if (attributeString == null) {
-                return defaultValue;
-            }
-            return Integer.parseInt(attributeString);
-        }
-
-        @Override
-        public void setFeature(String name, boolean state)
-                throws XmlPullParserException {
-            xmlParser.setFeature(name, state);
-        }
-
-        @Override
-        public boolean getFeature(String name) {
-            return xmlParser.getFeature(name);
-        }
-
-        @Override
-        public void setProperty(String name, Object value)
-                throws XmlPullParserException {
-            xmlParser.setProperty(name, value);
-        }
-
-        @Override
-        public Object getProperty(String name) {
-            return xmlParser.getProperty(name);
-        }
-
-        @Override
-        public void setInput(Reader in) throws XmlPullParserException {
-            xmlParser.setInput(in);
-        }
-
-        @Override
-        public void setInput(InputStream inputStream, String inputEncoding)
-                throws XmlPullParserException {
-            mInputStream = inputStream;
-            xmlParser.setInput(inputStream, inputEncoding);
-        }
-
-        @Override
-        public String getInputEncoding() {
-            return xmlParser.getInputEncoding();
-        }
-
-        @Override
-        public void defineEntityReplacementText(String entityName,
-                String replacementText) throws XmlPullParserException {
-            xmlParser.defineEntityReplacementText(entityName, replacementText);
-        }
-
-        @Override
-        public int getNamespaceCount(int depth) throws XmlPullParserException {
-            return xmlParser.getNamespaceCount(depth);
-        }
-
-        @Override
-        public String getNamespacePrefix(int pos) throws XmlPullParserException {
-            return xmlParser.getNamespacePrefix(pos);
-        }
-
-        @Override
-        public String getNamespaceUri(int pos) throws XmlPullParserException {
-            return xmlParser.getNamespacePrefix(pos);
-        }
-
-        @Override
-        public String getNamespace(String prefix) {
-            return xmlParser.getNamespace(prefix);
-        }
-
-        @Override
-        public int getDepth() {
-            return xmlParser.getDepth();
-        }
-
-        @Override
-        public String getPositionDescription() {
-            return xmlParser.getPositionDescription();
-        }
-
-        @Override
-        public int getLineNumber() {
-            return xmlParser.getLineNumber();
-        }
-
-        @Override
-        public int getColumnNumber() {
-            return xmlParser.getColumnNumber();
-        }
-
-        @Override
-        public boolean isWhitespace() throws XmlPullParserException {
-            return xmlParser.isWhitespace();
-        }
-
-        @Override
-        public String getText() {
-            return xmlParser.getText();
-        }
-
-        @Override
-        public char[] getTextCharacters(int[] holderForStartAndLength) {
-            return xmlParser.getTextCharacters(holderForStartAndLength);
-        }
-
-        @Override
-        public String getNamespace() {
-            return xmlParser.getNamespace();
-        }
-
-        @Override
-        public String getName() {
-            return xmlParser.getName();
-        }
-
-        @Override
-        public String getPrefix() {
-            return xmlParser.getPrefix();
-        }
-
-        @Override
-        public boolean isEmptyElementTag() throws XmlPullParserException {
-            return xmlParser.isEmptyElementTag();
-        }
-
-        @Override
-        public int getAttributeCount() {
-            return xmlParser.getAttributeCount();
-        }
-
-        @Override
-        public String getAttributeNamespace(int index) {
-            return xmlParser.getAttributeNamespace(index);
-        }
-
-        @Override
-        public String getAttributeName(int index) {
-            return xmlParser.getAttributeName(index);
-        }
-
-        @Override
-        public String getAttributePrefix(int index) {
-            return xmlParser.getAttributePrefix(index);
-        }
-
-        @Override
-        public String getAttributeType(int index) {
-            return xmlParser.getAttributeType(index);
-        }
-
-        @Override
-        public boolean isAttributeDefault(int index) {
-            return xmlParser.isAttributeDefault(index);
-        }
-
-        @Override
-        public String getAttributeValue(int index) {
-            return xmlParser.getAttributeValue(index);
-        }
-
-        @Override
-        public String getAttributeValue(String namespace, String name) {
-            return xmlParser.getAttributeValue(namespace, name);
-        }
-
-        @Override
-        public int getEventType() throws XmlPullParserException {
-            return xmlParser.getEventType();
-        }
-
-        @Override
-        public int next() throws XmlPullParserException, IOException {
-            return xmlParser.next();
-        }
-
-        @Override
-        public int nextToken() throws XmlPullParserException, IOException {
-            return xmlParser.nextToken();
-        }
-
-        @Override
-        public void require(int type, String namespace, String name)
-                throws XmlPullParserException, IOException {
-            xmlParser.require(type, namespace, name);
-        }
-
-        @Override
-        public String nextText() throws XmlPullParserException, IOException {
-            return xmlParser.nextText();
-        }
-
-        @Override
-        public int nextTag() throws XmlPullParserException, IOException {
-            return xmlParser.nextTag();
-        }
-
-    }
 }

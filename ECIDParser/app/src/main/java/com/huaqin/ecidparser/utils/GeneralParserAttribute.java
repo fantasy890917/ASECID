@@ -39,11 +39,6 @@ public interface GeneralParserAttribute {
     public static final String ATTR_NAME = "name";
     public static final String ATTR_VALUE = "value";
 
-    //Setting provider
-    public static final String ELEMENT_NAME_SYSTEMPROPERTY = "SystemProperty";
-    public static final String ELEMENT_NAME_SETTINGSSYSTEM = "Settings.System";
-    public static final String ELEMENT_NAME_SETTINGSSECURE = "Settings.Secure";
-
 
     public final static int FIND_CANDIDATE_MATCH = 1;
     public final static int NO_MATCH = -1;
@@ -51,30 +46,5 @@ public interface GeneralParserAttribute {
     public final static int FIND_BEST_MATCH = 2;
 
 
-    //Emailconfig flag start
-    public static final int FLAG_NONE         = 0x00;    // No flags
-    public static final int FLAG_SSL          = 0x01;    // Use SSL
-    public static final int FLAG_TLS          = 0x02;    // Use TLS
-    public static final int FLAG_AUTHENTICATE = 0x04;    // Use name/password for authentication
-    public static final int FLAG_TRUST_ALL    = 0x08;    // Trust all certificates
-    // Mask of settings directly configurable by the user
-    public static final int USER_CONFIG_MASK  = 0x0b;
-    public static final int FLAG_TLS_IF_AVAILABLE = 0x10;
-    public static final String EAS_PORT_NUMBER_SECURE_OFF = "80";
-    public static final String POP_PORT_NUMBER_SECURE_OFF = "110";
-    public static final String SMTP_PORT_NUMBER_SECURE_OFF = "25";
-    public static final String IMAP_PORT_NUMBER_SECURE_OFF = "143";
-    //Email flag end
 
-
-
-
-    /*<item name="VMS">       	==>*/
-    public static final String ID_VOICE_MAIL_IN_HOME_NUMBER ="Message@Voice_Mail_In_Home_Number";
-    /*<item name="RVMS">*/
-    public static final String ID_VOICE_MAIL_IN_ROAMING_NUMBER="Message@Voice_Mail_In_Roaming_Number";
-    /*<item name="ECC_list">*/
-    public static final String ID_ONESW_EM_NUMBER_WITH_SIM ="Network@Emergency_Numbers_Additional_numbers_With_SIM_Card";
-    /*	<item name="ShortCodeCall">*/
-    public static final String ID_ONESW_SHORT_CALL_SHORT_NUMBER = "Network@Short_Call_Code_Short_Number";
 }

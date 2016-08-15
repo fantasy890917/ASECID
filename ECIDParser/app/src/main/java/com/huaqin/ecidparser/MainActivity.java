@@ -33,7 +33,8 @@ public class MainActivity extends Activity {
 
     private void init_LGE_AutoProfile(LgeMccMncSimInfo simInfo, HashMap<String, String> mConfig)
     {
-        
+
+        mConfig = new HashMap<String,String>();
         Log.d(TAG,"Parser apkoverlay-Contacts3_JB:contacts_setting.xml");
         GeneralProfileParser lgeContactSettingParser =  new LgeContactSettingParser(this);
         lgeContactSettingParser.loadLgProfile(GeneralParserAttribute.FILE_PATH_CONTACT_SETTINGS, mConfig, simInfo);
@@ -41,34 +42,15 @@ public class MainActivity extends Activity {
 
         mConfig = new HashMap<String,String>();
         Log.d(TAG,"Parser apkoverlay-LGPartnerBookmarksProvider: browser_config.xml");
-
         ArrayList<Bookmark> mBookmarkList = new ArrayList<Bookmark>();
         LgeBrowserProfileParser lgeBrowserProfileParser =  new LgeBrowserProfileParser(this);
         lgeBrowserProfileParser.loadLgProfile(GeneralParserAttribute.FILE_PATH_BROWSER_CONFIG, mConfig, simInfo);
         mBookmarkList = lgeBrowserProfileParser.getBoomarkList();
         Log.d(TAG,"mConfig=="+mConfig.toString());
         Log.d(TAG,"mBookmarkList=="+mBookmarkList.size());
-        mConfig = new HashMap<String,String>();
-        /*
-        Log.d(TAG,"Parser GPRI: telephony.xml");
-        GeneralProfileParser lgeTelephonyParser = new LgeTelephonyParser(this);
-        lgeTelephonyParser.loadLgProfile(GeneralParserAttribute.FILE_PATH_TELEPHONY_PROFILE, mConfig, simInfo);
-        Log.d(TAG,"mConfig=="+mConfig.toString());
-        mConfig = new HashMap<String,String>();
 
-        Log.d(TAG,"should Parser LGTelephonyServices_config.xml, but no it,i will parser telephony_config.xml");
-        GeneralProfileParser LgeConfigParser = new LgeConfigParser(this);
-        LgeConfigParser.loadLgProfile(GeneralParserAttribute.FILE_PATH_TELEPHONY_CONFIG, mConfig, simInfo);
-        Log.d(TAG,"mConfig=="+mConfig.toString());
+
         mConfig = new HashMap<String,String>();
-        
-        Log.d(TAG,"Parser featureset.xml, no it");
-        GeneralProfileParser lgeFeatrueSetParser = new LgeFeatrueSetParser(this);
-        lgeFeatrueSetParser.loadLgProfile(GeneralParserAttribute.FILE_PATH_FEATURE_OPEN, mConfig, simInfo);
-        Log.d(TAG,"mConfig=="+mConfig.toString());
-		*/
-        mConfig = new HashMap<String,String>();
-        
         //mms special:<siminfo operator="default" country="" mcc="" mnc="" />
         Log.d(TAG,"Parser apkoverlay-LGMessage4:mms_config.xml");
         GeneralProfileParser lgeMmsConfigParser = new LgeMmsConfigParser(this);
@@ -76,23 +58,33 @@ public class MainActivity extends Activity {
         Log.d(TAG,"mConfig=="+mConfig.toString());
         mConfig = new HashMap<String,String>();
 
-        /*
+        Log.d(TAG,"should Parser LGTelephonyServices_config.xml, but no it,i will parser telephony_config.xml");
+        GeneralProfileParser LgeConfigParser = new LgeConfigParser(this);
+        LgeConfigParser.loadLgProfile(GeneralParserAttribute.FILE_PATH_TELEPHONY_CONFIG, mConfig, simInfo);
+        Log.d(TAG,"mConfig=="+mConfig.toString());
+
+
+        mConfig = new HashMap<String,String>();
         Log.d(TAG,"Parser apkoverlay-LGCbReceiver4:cb_config.xml");
-        GeneralProfileParser lgeCbConfigParser = new LgeCBConfigParser(this);
+        ArrayList<String> mCBChList = new ArrayList<String>();
+        ArrayList<String> mCBChNameList = new ArrayList<String>();
+        LgeCBConfigParser lgeCbConfigParser = new LgeCBConfigParser(this);
         lgeCbConfigParser.loadLgProfile(GeneralParserAttribute.FILE_PATH_CB_CONFIG, mConfig, simInfo);
+        mCBChList = lgeCbConfigParser.getChannelList();
+        mCBChNameList = lgeCbConfigParser.getChannelNameList();
         Log.d(TAG,"mConfig=="+mConfig.toString());
+        if(mCBChList != null){
+            Log.d(TAG,"mCBChList=="+mCBChList.toString());
+        }
+        if(mCBChNameList != null){
+            Log.d(TAG,"mCBChNameList=="+mCBChNameList.toString());
+        }
+
+
         mConfig = new HashMap<String,String>();
-        
-        Log.d(TAG,"Parser apkoverlay-LGEmail4:email_config.xml");
-        GeneralProfileParser lgeEmailConfigParser = new LgeEmailConfigParser(this);
-        lgeEmailConfigParser.loadLgProfile(GeneralParserAttribute.FILE_PATH_EMAIL_CONFIG, mConfig, simInfo);
-        OperatorConfigData data = ((LgeEmailConfigParser) lgeEmailConfigParser).getData();
-        Log.d(TAG,"mConfig=="+mConfig.toString());
-        mConfig = new HashMap<String,String>();
-        
-        Log.d(TAG,"Parser apkoverlay-LGSettingsProvider:settings_provider_config.xml");
-        GeneralProfileParser lgeSettingsProviderParser = new LgeSettingsProviderParser(this);
-        lgeSettingsProviderParser.loadLgProfile(GeneralParserAttribute.FILE_PATH_SETTINGS_PROVIDER_CONFIG, mConfig, simInfo);
+        Log.d(TAG,"Parser GPRI: telephony.xml");
+        GeneralProfileParser lgeTelephonyParser = new LgeTelephonyParser(this);
+        lgeTelephonyParser.loadLgProfile(GeneralParserAttribute.FILE_PATH_TELEPHONY_PROFILE, mConfig, simInfo);
         Log.d(TAG,"mConfig=="+mConfig.toString());
 
         mConfig = new HashMap<String,String>();
@@ -100,6 +92,23 @@ public class MainActivity extends Activity {
         GeneralProfileParser lgeLTEConfigParser = new LgeLTEConfigParser(this);
         lgeLTEConfigParser.loadLgProfile(GeneralParserAttribute.FILE_PATH_LTE_READY_CONFIG, mConfig, simInfo);
         Log.d(TAG,"mConfig=="+mConfig.toString());
+
+        mConfig = new HashMap<String,String>();
+        Log.d(TAG,"Parser apkoverlay-LGSettingsProvider:settings_provider_config.xml");
+        GeneralProfileParser lgeSettingsProviderParser = new LgeSettingsProviderParser(this);
+        lgeSettingsProviderParser.loadLgProfile(GeneralParserAttribute.FILE_PATH_SETTINGS_PROVIDER_CONFIG, mConfig, simInfo);
+        Log.d(TAG,"mConfig=="+mConfig.toString());
+
+
+        mConfig = new HashMap<String,String>();
+        Log.d(TAG,"Parser apkoverlay-LGEmail4:email_config.xml");
+
+        GeneralProfileParser lgeEmailConfigParser = new LgeEmailConfigParser(this);
+        lgeEmailConfigParser.loadLgProfile(GeneralParserAttribute.FILE_PATH_EMAIL_CONFIG, mConfig, simInfo);
+        Log.d(TAG,"mConfig=="+mConfig.toString());
+
+
+
 */
     }
 

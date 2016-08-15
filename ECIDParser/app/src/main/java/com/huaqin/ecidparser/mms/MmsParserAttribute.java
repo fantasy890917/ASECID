@@ -1,29 +1,12 @@
 package com.huaqin.ecidparser.mms;
 
 /**
- * Created by shiguibiao on 16-8-12.
+ * Created by shiguibiao on 16-8-14.
  */
 
-public interface ECIDMmsProperties {
-
-    /**
-     * module name
-     * Availability: getkey ,module parameter
-     */
-    public static final String ECID_MMS_MODULE = "ecid_mms";
-
-    /**
-     * SMS Service Centre
-     * Availability: Message - Setting - SMS Settings - SMS Service Centre
-     */
-    public static final String ECID_MMS_PROPERTY_DELEVERY_REPORT = "sms_dr";
-
-    /**
-     * Delivery_Report
-     * Availability: Message - Setting - SMS Settings - Delivery reports
-     */
-    public static final String ECID_MMS_PROPERTY_SMS_CENTER = "sms_dr";
-    matchmap.put("Message@SMS_Delivery_Report", "sms_dr");
+public interface MmsParserAttribute {
+    /*
+     matchmap.put("Message@SMS_Delivery_Report", "sms_dr");
     matchmap.put("Message@SMS_Number", "smsc");
     matchmap.put("Message@SMS_Editable", "smsc_readonly");
     matchmap.put("Message@SMS_Unicode_characters", "sms_char");
@@ -48,4 +31,5 @@ public interface ECIDMmsProperties {
     matchmap.put("Message@Cell_Broadcast_Receive", "cb_on");
     matchmap.put("Internet@Receive_push_message", "push_on");
     //matchmap.put("Message@MMS_Maximum_Size", "del_old");
+     */
 }

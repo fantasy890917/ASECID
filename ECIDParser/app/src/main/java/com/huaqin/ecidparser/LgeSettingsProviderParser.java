@@ -2,7 +2,7 @@ package com.huaqin.ecidparser;
 
 import android.content.Context;
 import android.util.Log;
-
+import com.huaqin.ecidparser.utils.Utils;
 import com.huaqin.ecidparser.utils.LgeMccMncSimInfo;
 import com.huaqin.ecidparser.utils.ProfileData;
 
@@ -12,82 +12,23 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
+import com.huaqin.ecidparser.settings.SettingsParserAttribute;
 
-
-public class LgeSettingsProviderParser extends GeneralProfileParser {
-
+public class LgeSettingsProviderParser
+		extends GeneralProfileParser
+		implements SettingsParserAttribute{
+	private static final String TAG = Utils.APP+LgeSettingsProviderParser.class.getSimpleName();
 
 	public LgeSettingsProviderParser(Context context) {
 		super(context);
 
 	}
 
-	@Override
-	public ProfileData getMatchedProfile(XmlPullParser parser, LgeMccMncSimInfo simInfo, HashMap map ) {
 
-		ProfileData commonProfile = null;
-		ProfileData validProfile = null;
-		ProfileData featureProfile = null;
-		boolean found = false;
-		MatchedProfile profile = new MatchedProfile();
-
-		if (parser == null) {
-			return null;
-		}
-
-		try {
-			// find a "<profiles>" element
-			beginDocument(parser, ELEMENT_NAME_PROFILES);
-
-			while (true) {
-				// find a "<profiles>" element
-				if (ELEMENT_NAME_PROFILES.equals(parser.getName())) {
-					nextElement(parser);
-				}
-				// find a "<profile>" element
-				if (ELEMENT_NAME_PROFILE.equals(parser.getName())) {
-					nextElement(parser);    // find a "<siminfo>" element or <FeatureSet>
-				}
-				if (parser.getEventType() == XmlPullParser.END_DOCUMENT) {
-					break;
-				}
-				// find a "<siminfo>" element
-				if (ELEMENT_NAME_SIMINFO.equals(parser.getName())) {
-
-					found = getValidProfile(profile, parser, simInfo);
-
-					// test code , if sim info is null, use default profile (need to place default profile at the top of the profiles, the fastest way)
-					// when bestMatchedProfile was found
-					if (((simInfo == null || simInfo.isNull()) && profile.mDefaultProfile != null) || profile.mBestMatchedProfile != null) {
-						if (VDBG) {
-							Log.v(TAG, "[getMatchedProfile] sim info : " + simInfo + "bestMatchedProfile" + profile.mBestMatchedProfile);
-						}
-						break;
-					}
-
-					// we didn't parse this element
-					if (!found) {
-						skipCurrentElement(parser);
-
-						if (DBG) { Log.d(TAG, "[getMatchedProfile] skipCurrentElement"); }
-					}
-				} 
-			}
-		} catch (XmlPullParserException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-		validProfile = profile.mBestMatchedProfile != null ? profile.mBestMatchedProfile :
-			profile.mCandidateProfile != null ? profile.mCandidateProfile : profile.mDefaultProfile;
-
-		return mergeProfileIfNeeded(commonProfile, validProfile, featureProfile, map);
-
-	}
 
     protected void changeGpriValueFromLGE(HashMap hashmap, ProfileData data)
     {
+		Log.d(TAG,"changeGpriValueFromLGE");
         HashMap<String, String> matchmap = new HashMap<String,String>();
         matchmap.put("Settings@Phone_Time_Format", "time_12_24");
         matchmap.put("Settings@Phone_Auto_update_date/time", "auto_time");
@@ -125,7 +66,8 @@ public class LgeSettingsProviderParser extends GeneralProfileParser {
 
 
 		NameValueProfile p = new NameValueProfile();
-		while (ELEMENT_NAME_SIMINFO.equals(parser.getName()) || ELEMENT_NAME_FEATURESET.equals(parser.getName())) {
+		while (ELEMENT_NAME_SIMINFO.equals(parser.getName())
+				|| ELEMENT_NAME_FEATURESET.equals(parser.getName())) {
 			nextElement(parser);
 		}
 
@@ -134,21 +76,22 @@ public class LgeSettingsProviderParser extends GeneralProfileParser {
 				|| ELEMENT_NAME_SETTINGSSECURE.equals(parser.getName()) ) {
 
 			String tag = parser.getName();
-			if (DBG) {
+			if (true) {
 				Log.d(TAG, "[readProfile] TAG : " + tag);
 			}
 			
 			int AttributeNum = parser.getAttributeCount();
 			
 			for (int i = 0; i < AttributeNum; i++) {
-
-				if (parser.getName() != null){
-					p.setValue(parser.getAttributeName(i), parser.getAttributeValue(i));
+				String key = parser.getAttributeName(i);
+				String value = parser.getAttributeValue(i);
+				Log.d(TAG,"[readProfile] Key : "+key+" value:"+value);
+				if((!Utils.isEmpty(key))
+						&& (!Utils.isEmpty(value))){
+					p.setValue(key,value);
 				}
 			}
 			nextElement(parser);
-
-			
 
 		}
 		return (ProfileData)p;

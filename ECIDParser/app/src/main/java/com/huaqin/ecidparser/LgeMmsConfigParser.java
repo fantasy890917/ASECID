@@ -23,11 +23,8 @@ public class LgeMmsConfigParser extends GeneralProfileParser {
     @Override
     protected ProfileData readProfile(XmlPullParser parser)
             throws XmlPullParserException, IOException {
-        Log.d(TAG,"readProfile-----------------");
         NameValueProfile p = new NameValueProfile();
-        int type;
-        Log.d(TAG,"readProfile---name="+parser.getName()+" text="+parser.getText());
-        while (ELEMENT_NAME_SIMINFO.equals(parser.getName()) ||
+       while (ELEMENT_NAME_SIMINFO.equals(parser.getName()) ||
                 ELEMENT_NAME_FEATURESET.equals(parser.getName())) {
             nextElement(parser);
         }
@@ -40,7 +37,7 @@ public class LgeMmsConfigParser extends GeneralProfileParser {
 
             String key = parser.getName();
             if (key != null) {
-                type = parser.next();
+                int type = parser.next();
                 if (type == XmlPullParser.TEXT) {
                     String value = parser.getText();
                     p.setValue(key, value);
