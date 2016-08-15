@@ -8,7 +8,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 
+import com.huaqin.ecidparser.amrwb.AmrwbParserAttribute;
 import com.huaqin.ecidparser.bookmarks.Bookmark;
+import com.huaqin.ecidparser.email.EmailServerProvider;
+import com.huaqin.ecidparser.email.EmailSettingsInfo;
+import com.huaqin.ecidparser.email.EmailSettingsProtocol;
 import com.huaqin.ecidparser.utils.GeneralParserAttribute;
 import com.huaqin.ecidparser.utils.LgeMccMncSimInfo;
 import com.huaqin.ecidparser.utils.Utils;
@@ -27,8 +31,8 @@ public class MainActivity extends Activity {
         HashMap<String, String> mConfig = new HashMap<String,String>();
         TextView tv = (TextView)findViewById(R.id.textView);
         ECIDManager ecid = (ECIDManager) getSystemService(Context.ECID_PARSER_SERVICE);
-        tv.setText(ecid.getValue("test"));
-        init_LGE_AutoProfile(mSimInfo,mConfig);
+        tv.setText(ecid.getCBChannelList().toString());
+        //init_LGE_AutoProfile(mSimInfo,mConfig);
     }
 
     private void init_LGE_AutoProfile(LgeMccMncSimInfo simInfo, HashMap<String, String> mConfig)
@@ -102,14 +106,24 @@ public class MainActivity extends Activity {
 
         mConfig = new HashMap<String,String>();
         Log.d(TAG,"Parser apkoverlay-LGEmail4:email_config.xml");
-
-        GeneralProfileParser lgeEmailConfigParser = new LgeEmailConfigParser(this);
+        LgeEmailConfigParser lgeEmailConfigParser = new LgeEmailConfigParser(this);
+        ArrayList<EmailServerProvider> mEmailAccountList = null;
+        EmailSettingsInfo mEmailSettingsInfo = null;
+        EmailSettingsProtocol mEmailSettingsProtocol = null;
         lgeEmailConfigParser.loadLgProfile(GeneralParserAttribute.FILE_PATH_EMAIL_CONFIG, mConfig, simInfo);
+        mEmailAccountList = lgeEmailConfigParser.getEmailAccountList();
+        mEmailSettingsProtocol = lgeEmailConfigParser.getEmailProtocol();
+        mEmailSettingsInfo = lgeEmailConfigParser.getEmailSettings();
+        Log.d(TAG,"result,mEmailAccountList=="+mEmailAccountList.toString());
+        Log.d(TAG,"result,mEmailSettingsProtocol=="+mEmailSettingsProtocol.toString());
+        Log.d(TAG,"result,mEmailSettingsInfo=="+mEmailSettingsInfo.toString());
         Log.d(TAG,"mConfig=="+mConfig.toString());
 
-
-
-*/
+        Log.d(TAG,"Parser gpri-LGEmail4:amrwb_gpri.xml");
+        mConfig = new HashMap<String,String>();
+        AmrwbSettingParser amrwbSettingParser =  new AmrwbSettingParser(this);
+        amrwbSettingParser.loadLgProfile(GeneralParserAttribute.FILE_PATH_AMRWB_CONFIG,mConfig,simInfo);
+        Log.d(TAG,"mConfig=="+mConfig.toString());
     }
 
     @Override

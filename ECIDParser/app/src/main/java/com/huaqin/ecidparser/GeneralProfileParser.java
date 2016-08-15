@@ -36,18 +36,6 @@ public class GeneralProfileParser implements GeneralParserAttribute {
     public FileReader in = null;
     public XmlPullParserFactory factory;
     public XmlPullParser parser = null;
-    public ProfileData parseData = null;
-
-
-    public final static int FLAGS_NO_MATCH = 0;
-    public final static int FLAGS_MATCH_FOR_NO_PRI = 1 << 0; // 1
-    public final static int FLAGS_MATCH_IMSI = 1 << 2; // 4
-    public final static int FLAGS_MATCH_GID = 1 << 3; // 8
-    public final static int FLAGS_MATCH_SPN = 1 << 4;
-    public final static int FLAGS_MATCH_MNC = 1 << 5;
-    public final static int FLAGS_MATCH_MCC = 1 << 6;
-
-    public static boolean mXmlMatchingData = false;
 
     public static int mPhoneId = 0;
 

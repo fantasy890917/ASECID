@@ -24,7 +24,39 @@ public interface EmailParserAttribute {
     public static final String ELEMENT_NAME_PROVIDERS = "providers";
     public static final String ELEMENT_NAME_PROVIDER_ITEM = "provider";
 
-    public static final String ATTR_NOTIFICATION = "name";
-    public static final String ATTR_SIGNATURE = "value";
-    public static final String ATTR_ESP = "value";
+    public static final String ELEMENT_NAME_NOTIFICATION = "notification";
+    public static final String ELEMENT_NAME_SIGNATURE = "signature";
+    public static final String ELEMENT_NAME_ESP = "esp";
+    public static final String ELEMENT_NAME_CONTACT = "contact";
+    public static final String ELEMENT_NAME_CALENDAR = "calendar";
+    public static final String ELEMENT_NAME_TASKS = "tasks";
+    public static final String ELEMENT_NAME_SMS = "sms";
+    public static final String ELEMENT_NAME_PROTOCOL = "protocol";
+    public static final String ELEMENT_NAME_INCOMING = "incoming";
+    public static final String ELEMENT_NAME_OUTGOING = "outgoing";
+
+    public static final String ATTR_NAME_ENABLE = "enabled";
+    public static final String ATTR_NAME_SYNC= "sync";
+    public static final String ATTR_NAME_MODE= "mode";
+
+    public static final String ATTR_NAME_SYNC_ROAMING= "syncRoaming";
+    public static final String ATTR_NAME_SYNC_INTERVAL= "syncInterval";
+    public static final String ATTR_NAME_POP_POLICY= "popDeletePolicy";
+    public static final String ATTR_NAME_EASPROXY =  "easProxy";
+    public static final String ATTR_NAME_IN_PEAK =  "updateScheduleInPeak";
+    public static final String ATTR_NAME_OFF_PEAK =  "updateScheduleOffPeak";
+
+    public static final String ATTR_NAME_DOMAIN= "domain";
+    public static final String ATTR_NAME_EMAIL= "email";
+
+    public static final String ATTR_NAME_ADDRESS= "address";
+    public static final String ATTR_NAME_PROTOCOL =  "protocol";
+    public static final String ATTR_NAME_PORT =  "port";
+    public static final String ATTR_NAME_SECURITY =  "security";
+    public static final String ATTR_NAME_USERNAME =  "username";
+    public static final String ATTR_NAME_PASSWORD =  "password";
+    public static final String ATTR_NAME_AUTH =  "auth";
+
+
+
 }

@@ -11,14 +11,12 @@
 package com.huaqin.ecidparser.email;
 
 
-import com.huaqin.ecidparser.utils.GeneralParserAttribute;
-
 /*
  * LGSI_CHANGE_PROTOCOL Shrey Chaturvedi 20 Dec 2013
  * Modified the enum types with HostAuth constants.
  * These flag values are referred by engine during authentication process
  */
-public enum EEMAIL_SECURE_CONNECTION_TYPE implements GeneralParserAttribute {
+public enum EEMAIL_SECURE_CONNECTION_TYPE implements EmailParserAttribute {
 
 	//if security is 0 then basic authentication should occur
 

@@ -3,19 +3,12 @@ package com.huaqin.ecidparser;
 import android.content.Context;
 import android.util.Log;
 
-import com.huaqin.ecidparser.utils.CAItem;
-import com.huaqin.ecidparser.utils.GeneralParserAttribute;
-import com.huaqin.ecidparser.utils.LgeMccMncSimInfo;
 import com.huaqin.ecidparser.utils.ProfileData;
 import com.huaqin.ecidparser.utils.Utils;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlPullParserFactory;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;

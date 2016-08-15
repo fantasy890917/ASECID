@@ -1,8 +1,10 @@
 package com.huaqin.ecidparser;
 
 import android.content.Context;
+import android.provider.Settings;
 import android.util.Log;
 
+import com.huaqin.ecidparser.telephony.TelephonyParserAttribute;
 import com.huaqin.ecidparser.utils.LgeMccMncSimInfo;
 import com.huaqin.ecidparser.utils.ProfileData;
 import com.huaqin.ecidparser.utils.Utils;
@@ -13,7 +15,6 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
-import com.huaqin.ecidparser.telephony.TelephonyParserAttribute;
 public class LgeLTEConfigParser extends GeneralProfileParser
         implements TelephonyParserAttribute {
     private static final String TAG = Utils.APP+LgeLTEConfigParser.class.getSimpleName();
@@ -40,8 +41,8 @@ public class LgeLTEConfigParser extends GeneralProfileParser
     @Override
     protected void changeGpriValueFromLGE(HashMap hashmap, ProfileData data){
         HashMap<String, String> matchmap = new HashMap<String,String>();
-        matchmap.put(PROPERTY_LTEREADY_VALUE, ATTR_NAME_VALUE);
-        matchmap.put(PROPERTY_LTEREADY_MODE,ATTR_NAME_LTE_MODE);
+        matchmap.put(KEY_LTEREADY_VALUE, ATTR_NAME_VALUE);
+        matchmap.put(KEY_LTEREADY_MODE,ATTR_NAME_LTE_MODE);
 
         Iterator<String> key = matchmap.keySet().iterator();
 
@@ -52,9 +53,9 @@ public class LgeLTEConfigParser extends GeneralProfileParser
             String value =((NameValueProfile)data).getValue(matchString_Value);
             if (value != null)
             {
-                if(PROPERTY_LTEREADY_MODE.equals(tag)){
-                    //Settings.System.putInt(mContext.getContentResolver(), LTEREADY_MODE_DB_NAME,
-                     //       value.equals("LTE") ? 1 : 0);
+                if(KEY_LTEREADY_MODE.equals(tag)){
+                    Settings.System.putInt(mContext.getContentResolver(), KEY_LTEREADY_MODE,
+                            value.equals("LTE") ? 1 : 0);
                 }
                 hashmap.put(tag, value);
             }

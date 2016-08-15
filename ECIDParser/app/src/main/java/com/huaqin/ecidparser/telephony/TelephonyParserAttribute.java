@@ -10,8 +10,8 @@ public interface TelephonyParserAttribute {
 
     public static final String ELEMENT_NAME_LTE = "lte";
 
-    public static final String PROPERTY_LTEREADY_VALUE = "Lteready@value";
-    public static final String PROPERTY_LTEREADY_MODE = "Lteready@ltemode";
+    public static final String KEY_LTEREADY_VALUE = "Lteready@value";
+    public static final String KEY_LTEREADY_MODE = "Lteready@ltemode";
 
     /*
     <item name="VMS">123</item>

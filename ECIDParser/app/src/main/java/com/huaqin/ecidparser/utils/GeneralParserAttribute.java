@@ -11,7 +11,6 @@ public interface GeneralParserAttribute {
 
     public static final String FILE_PATH_TELEPHONY_PROFILE = Flex_Path + "telephony.xml";
     public static final String FILE_PATH_TELEPHONY_CONFIG = Flex_Path + "telephony_config.xml";
-    public static final String FILE_PATH_FEATURE_OPEN = Flex_Path + "featureset.xml";
     public static final String FILE_PATH_CONTACT_SETTINGS = Flex_Path + "contacts_setting.xml";
     public static final String FILE_PATH_BROWSER_CONFIG = Flex_Path + "browser_config.xml";
     public static final String FILE_PATH_MMS_CONFIG = Flex_Path + "mms_config.xml";
@@ -19,6 +18,7 @@ public interface GeneralParserAttribute {
     public static final String FILE_PATH_EMAIL_CONFIG = Flex_Path + "email_config.xml";
     public static final String FILE_PATH_SETTINGS_PROVIDER_CONFIG = Flex_Path + "settings_provider_config.xml";
     public static final String FILE_PATH_LTE_READY_CONFIG = Flex_Path + "lteready.xml";
+    public static final String FILE_PATH_AMRWB_CONFIG = Flex_Path + "amrwb_gpri.xml";
 
     public static final String OPERATOR = "ro.product.carrier"; //"ro.build.target_operator"
     public static final String COUNTRY = "ro.product.country"; //"ro.build.target_country"
@@ -46,5 +46,9 @@ public interface GeneralParserAttribute {
     public final static int FIND_BEST_MATCH = 2;
 
 
-
+    public static final String ECID_FIRST_VALID_MCC = "ro.ecid.first-mcc";
+    public static final String ECID_FIRST_VALID_MNC = "ro.ecid.first-mnc";
+    public static final String ECID_FIRST_VALID_GID = "ro.ecid.first-gid";
+    public static final String ECID_FIRST_VALID_SPN = "ro.ecid.first-spn";
+    public static final String ECID_FIRST_VALID_IMSI = "ro.ecid.first-imsi";
 }

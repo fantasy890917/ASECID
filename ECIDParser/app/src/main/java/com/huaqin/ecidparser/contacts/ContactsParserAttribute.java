@@ -7,10 +7,27 @@ package com.huaqin.ecidparser.contacts;
 public interface ContactsParserAttribute {
 
     public static final String ATTR_ITEM_STORAGE = "NEW_CONTACT_DEFAULT";
+
+    /**
+     * add new contacts default storage in phone memory
+     */
+    public static final int IN_PHONE_MEMORY = 0;
+
+    /**
+     * add new contacts default storage in sim memory
+     */
+    public static final int IN_SIM_MEMORY = 1;
+
+    /**
+     * add new contacts default storage in sim memory
+     */
     public static final String ATTR_VALUE_SIM_STORAGE = "In SIM memory";
-    public static final String ATTR_VALUE_GOOGLE_STORAGE = "In Google memory";
-    public static final String KEY_PREFER_DEFAULT_ACCOUNT = "default_account";
-    public static final String SIM_ACCOUNT = "sim";
-    public static final String GOOGLE_ACCOUNT = "google";
-    public static final String PHONE_ACCOUNT = "phone";
+
+    /**
+     * add new contacts default storage in phone memory
+     */
+    public static final String ATTR_VALUE_PHONE_STORAGE = "In Phone Memory";
+
+
+    public static final String  KEY_DEFAULT_STORAGE_LOCATION = "Phonebook@Default_Storage_Location";
 }

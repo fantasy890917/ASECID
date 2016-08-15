@@ -4,18 +4,12 @@ import android.content.Context;
 import android.util.Log;
 
 import com.huaqin.ecidparser.cellbroadcast.CBParserAttribute;
-import com.huaqin.ecidparser.utils.CAItem;
-import com.huaqin.ecidparser.utils.LgeMccMncSimInfo;
 import com.huaqin.ecidparser.utils.ProfileData;
 import com.huaqin.ecidparser.utils.Utils;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlPullParserFactory;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -68,9 +62,9 @@ public class LgeCBConfigParser extends GeneralProfileParser implements CBParserA
         Log.d(TAG,"changeGpriValueFromLGE");
         HashMap<String, String> matchmap = new HashMap<String,String>();
         matchmap.put("Message@Cell_Broadcast_Receive", ATTR_CB_DEFAULT_SWITCH);
-        matchmap.put("Message@Cell_Broadcast_Channel_Number_#", ATTR_CB_DEFAULT_CH_LIST);
-        matchmap.put("Message@Cell_Broadcast_Support_EU_Alert", ATTR_CB_DEFAULT_EU_ALERT);
-        matchmap.put("Message@Cell_Broadcast_Channel_Name_#", ATTR_CB_DEFAULT_CH_NAME);
+        //matchmap.put("Message@Cell_Broadcast_Channel_Number_#", ATTR_CB_DEFAULT_CH_LIST);
+        //matchmap.put("Message@Cell_Broadcast_Support_EU_Alert", ATTR_CB_DEFAULT_EU_ALERT);
+        //matchmap.put("Message@Cell_Broadcast_Channel_Name_#", ATTR_CB_DEFAULT_CH_NAME);
 
         Iterator<String> key = matchmap.keySet().iterator(); 
         
